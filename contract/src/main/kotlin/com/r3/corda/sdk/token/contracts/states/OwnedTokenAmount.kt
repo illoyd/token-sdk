@@ -21,7 +21,7 @@ import net.corda.core.schemas.QueryableState
  * [FungibleState] as the expectation is that it contains amounts of a token type which can be split and merged.
  *
  * All [EmbeddableToken]s are wrapped with an [IssuedToken] class to add the issuer party. This is necessary so that the
- * [OwnedToken] represents a contract or agreement between an issuer and an owner. In effect, this token conveys a right
+ * [NonfungibleTokenState] represents a contract or agreement between an issuer and an owner. In effect, this token conveys a right
  * for the owner to make a claim on the issuer for whatever the [EmbeddableToken] represents.
  *
  * The class is open, so it can be extended to add new functionality, like a whitelisted token, for example.

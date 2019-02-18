@@ -1,6 +1,6 @@
 package com.r3.corda.sdk.token.contracts.utilities
 
-import com.r3.corda.sdk.token.contracts.states.OwnedToken
+import com.r3.corda.sdk.token.contracts.states.NonfungibleTokenState
 import com.r3.corda.sdk.token.contracts.states.OwnedTokenAmount
 import com.r3.corda.sdk.token.contracts.types.EmbeddableToken
 import com.r3.corda.sdk.token.contracts.types.IssuedToken
@@ -59,10 +59,10 @@ infix fun <T : EmbeddableToken> Amount<IssuedToken<T>>.ownedBy(owner: AbstractPa
 
 infix fun <T : EmbeddableToken> Amount<IssuedToken<T>>._ownedBy(owner: AbstractParty) = OwnedTokenAmount(this, owner)
 
-// As above but wraps the token with an OwnedToken state.
+// As above but wraps the token with an NonfungibleTokenState state.
 infix fun <T : EmbeddableToken> IssuedToken<T>.ownedBy(owner: AbstractParty) = _ownedBy(owner)
 
-infix fun <T : EmbeddableToken> IssuedToken<T>._ownedBy(owner: AbstractParty) = OwnedToken(this, owner)
+infix fun <T : EmbeddableToken> IssuedToken<T>._ownedBy(owner: AbstractParty) = NonfungibleTokenState(this, owner)
 
 // Add a notary to an evolvable token.
 infix fun <T : ContractState> T.withNotary(notary: Party): TransactionState<T> = _withNotary(notary)

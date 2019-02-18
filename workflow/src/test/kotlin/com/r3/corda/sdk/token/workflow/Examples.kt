@@ -1,6 +1,6 @@
 package com.r3.corda.sdk.token.workflow
 
-import com.r3.corda.sdk.token.contracts.states.OwnedToken
+import com.r3.corda.sdk.token.contracts.states.NonfungibleTokenState
 import com.r3.corda.sdk.token.contracts.states.OwnedTokenAmount
 import com.r3.corda.sdk.token.contracts.types.IssuedToken
 import com.r3.corda.sdk.token.contracts.types.TokenPointer
@@ -32,10 +32,10 @@ class Examples : LedgerTestWithPersistence() {
         val house = House("24 Leinster Gardens, Bayswater, London", 900_000.GBP, listOf(BOB.party))
         val housePointer: TokenPointer<House> = house.toPointer()
         val houseIssuedByBob: IssuedToken<TokenPointer<House>> = housePointer issuedBy BOB.party
-        val houseIssuedByBobOwnedByAlice: OwnedToken<TokenPointer<House>> = houseIssuedByBob ownedBy ALICE.party
+        val houseIssuedByBobOwnedByAlice: NonfungibleTokenState<TokenPointer<House>> = houseIssuedByBob ownedBy ALICE.party
 
         // Now we want to do fractional ownership in this house...
-        // Redeem the OwnedToken and reissue it as an OwnedTokenAmount
+        // Redeem the NonfungibleTokenState and reissue it as an OwnedTokenAmount
         val oneHundredUnitsOfHouse: OwnedTokenAmount<TokenPointer<House>> = 100 of housePointer issuedBy BOB.party ownedBy ALICE.party
     }
 

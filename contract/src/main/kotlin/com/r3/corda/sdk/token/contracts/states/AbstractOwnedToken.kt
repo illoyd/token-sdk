@@ -1,14 +1,11 @@
 package com.r3.corda.sdk.token.contracts.states
 
-import com.r3.corda.sdk.token.contracts.types.EmbeddableToken
-import com.r3.corda.sdk.token.contracts.types.FixedToken
-import com.r3.corda.sdk.token.contracts.types.TokenPointer
 import net.corda.core.contracts.OwnableState
 import net.corda.core.crypto.toStringShort
 import net.corda.core.identity.AbstractParty
 import net.corda.core.identity.Party
 
-/** Contains common [OwnedToken] functionality. */
+/** Contains common [NonfungibleTokenState] functionality. */
 abstract class AbstractOwnedToken : OwnableState {
 
     /** The current [owner] is always the sole participant. */

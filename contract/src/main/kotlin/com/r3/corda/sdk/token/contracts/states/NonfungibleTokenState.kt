@@ -1,6 +1,6 @@
 package com.r3.corda.sdk.token.contracts.states
 
-import com.r3.corda.sdk.token.contracts.OwnedTokenContract
+import com.r3.corda.sdk.token.contracts.NonfungibleTokenContract
 import com.r3.corda.sdk.token.contracts.commands.MoveTokenCommand
 import com.r3.corda.sdk.token.contracts.schemas.OwnedTokenSchemaV1
 import com.r3.corda.sdk.token.contracts.schemas.PersistentOwnedToken
@@ -20,19 +20,19 @@ import net.corda.core.schemas.QueryableState
  * ensure that only ONE of a non-fungible token is ever issued.
  *
  * All [EmbeddableToken]s are wrapped with an [IssuedToken] class to add the issuer party. This is necessary so that the
- * [OwnedToken] represents a contract or agreement between an issuer and an owner. In effect, this token conveys a right
+ * [NonfungibleTokenState] represents a contract or agreement between an issuer and an owner. In effect, this token conveys a right
  * for the owner to make a claim on the issuer for whatever the [EmbeddableToken] represents.
  *
- * [OwnedToken] is open, so it can be extended to allow for additional functionality, if necessary.
+ * [NonfungibleTokenState] is open, so it can be extended to allow for additional functionality, if necessary.
  */
-@BelongsToContract(OwnedTokenContract::class)
-open class OwnedToken<T : EmbeddableToken>(
+@BelongsToContract(NonfungibleTokenContract::class)
+open class NonfungibleTokenState<T : EmbeddableToken>(
         val token: IssuedToken<T>,
         override val owner: AbstractParty
 ) : AbstractOwnedToken(), QueryableState {
     /** Helper for changing the owner of the state. */
     override fun withNewOwner(newOwner: AbstractParty): CommandAndState {
-        return CommandAndState(MoveTokenCommand(token), OwnedToken(token, newOwner))
+        return CommandAndState(MoveTokenCommand(token), NonfungibleTokenState(token, newOwner))
     }
 
     override fun toString(): String = "$token owned by $ownerString"
@@ -51,7 +51,7 @@ open class OwnedToken<T : EmbeddableToken>(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is OwnedToken<*>) return false
+        if (other !is NonfungibleTokenState<*>) return false
 
         if (token != other.token) return false
         if (owner != other.owner) return false

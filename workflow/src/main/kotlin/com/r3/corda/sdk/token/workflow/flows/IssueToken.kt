@@ -88,7 +88,7 @@ object IssueToken {
             // Create the issued token. We add this to the commands for grouping.
             val issuedToken: IssuedToken<T> = token issuedBy me
 
-            // Create the token. It's either an OwnedToken or OwnedTokenAmount.
+            // Create the token. It's either an NonfungibleTokenState or OwnedTokenAmount.
             val ownedToken: AbstractOwnedToken = if (amount == null) {
                 issuedToken ownedBy owningParty
             } else {

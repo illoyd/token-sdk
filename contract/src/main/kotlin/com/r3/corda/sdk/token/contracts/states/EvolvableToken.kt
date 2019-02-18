@@ -1,6 +1,5 @@
 package com.r3.corda.sdk.token.contracts.states
 
-import com.r3.corda.sdk.token.contracts.types.Token
 import com.r3.corda.sdk.token.contracts.types.TokenPointer
 import net.corda.core.contracts.LinearPointer
 import net.corda.core.contracts.LinearState
@@ -10,10 +9,10 @@ import net.corda.core.identity.Party
 
 /**
  * [EvolvableToken]s _are_ state objects because the expectation is that they will evolve over time. Of course in-lining
- * a [LinearState] directly into the [OwnedToken] or [OwnedTokenAmount] state doesn't make much sense, as you would have
+ * a [LinearState] directly into the [NonfungibleTokenState] or [OwnedTokenAmount] state doesn't make much sense, as you would have
  * to perform a state update to change the token type. It makes more sense to include a pointer to the token type
  * instead. That's what [TokenPointer] is for. This way, the token can evolve independently to which party currently
- * owns (some amount) of the token. Because the [EvolvableToken] is not inlined into the [OwnedToken] or
+ * owns (some amount) of the token. Because the [EvolvableToken] is not inlined into the [NonfungibleTokenState] or
  * [OwnedTokenAmount] state it does not sub-class [EmbeddableToken].
  */
 abstract class EvolvableToken : LinearState, TokenizableAssetInfo {

@@ -2,8 +2,7 @@ package com.r3.corda.sdk.token.workflow.utilities
 
 import com.r3.corda.sdk.token.contracts.schemas.PersistentOwnedToken
 import com.r3.corda.sdk.token.contracts.schemas.PersistentOwnedTokenAmount
-import com.r3.corda.sdk.token.contracts.states.AbstractOwnedToken
-import com.r3.corda.sdk.token.contracts.states.OwnedToken
+import com.r3.corda.sdk.token.contracts.states.NonfungibleTokenState
 import com.r3.corda.sdk.token.contracts.states.OwnedTokenAmount
 import com.r3.corda.sdk.token.contracts.types.EmbeddableToken
 import com.r3.corda.sdk.token.workflow.schemas.DistributionRecord
@@ -112,7 +111,7 @@ fun <T : EmbeddableToken> VaultService.ownedTokenAmountsByToken(embeddableToken:
 }
 
 // Get all owned tokens for a specific token, ignoring the issuer.
-fun <T : EmbeddableToken> VaultService.ownedTokensByToken(embeddableToken: T): Vault.Page<OwnedToken<T>> {
+fun <T : EmbeddableToken> VaultService.ownedTokensByToken(embeddableToken: T): Vault.Page<NonfungibleTokenState<T>> {
     return queryBy(ownedTokenCriteria(embeddableToken))
 }
 
