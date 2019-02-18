@@ -119,7 +119,8 @@ class TokenFlowTests : MockNetworkTest(numberOfNodes = 3) {
         val housePointer: TokenPointer<House> = house.toPointer()
         val issueTokenTx = I.issueTokens(housePointer, A, NOTARY, 100 of housePointer).getOrThrow()
         A.watchForTransaction(issueTokenTx.id).toCompletableFuture().getOrThrow()
-        val houseQuery = A.transaction { A.services.vaultService.getLinearStateById<LinearState>(housePointer.pointer.pointer) }
+        val houseQuery = A.transaction { A.services.vaultService.getLinearStateById<House>(housePointer.pointer.pointer) }
+        assertEquals(housePointer.pointer.pointer, houseQuery?.state?.data?.linearId, "Did not find the expected linear ID")
         // Move some of the tokens.
         val moveTokenTx = A.moveTokens(housePointer, B, 50 of housePointer, anonymous = true).getOrThrow()
         B.watchForTransaction(moveTokenTx.id).getOrThrow()
@@ -137,8 +138,8 @@ class TokenFlowTests : MockNetworkTest(numberOfNodes = 3) {
         val issueTokenA = I.issueTokens(housePointer, A, NOTARY, 50 of housePointer).getOrThrow()
         A.watchForTransaction(issueTokenA.id).toCompletableFuture().getOrThrow()
         // Issue to node B.
-        val issueTokenB = I.issueTokens(housePointer, A, NOTARY, 50 of housePointer).getOrThrow()
-        A.watchForTransaction(issueTokenB.id).toCompletableFuture().getOrThrow()
+        val issueTokenB = I.issueTokens(housePointer, B, NOTARY, 50 of housePointer).getOrThrow()
+        B.watchForTransaction(issueTokenB.id).toCompletableFuture().getOrThrow()
     }
 
 }

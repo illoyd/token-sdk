@@ -81,7 +81,7 @@ object MoveToken {
             }
 
             // Resolve the issuance transaction.
-            return subFlow(ReceiveFinalityFlow(otherSideSession = otherSession, statesToRecord = StatesToRecord.ONLY_RELEVANT))
+            return subFlow(ReceiveFinalityFlow(otherSideSession = otherSession, statesToRecord = StatesToRecord.ALL_VISIBLE))
         }
     }
 
