@@ -116,7 +116,7 @@ class OwnedTokenAmountTests {
             tweak {
                 output(FungibleTokenContract.contractId, 0 of issuedToken ownedBy ALICE.party)
                 command(ISSUER.publicKey, IssueTokenCommand(issuedToken))
-                this `fails with` "You cannot issue tokens with a zero amount."
+                this `fails with` "When issuing tokens an amount > ZERO must be issued."
             }
             // Includes another token type and a matching command.
             tweak {
@@ -199,7 +199,7 @@ class OwnedTokenAmountTests {
                 command(ALICE.publicKey, MoveTokenCommand(USD issuedBy BOB.party))
                 // Command for the move.
                 command(ALICE.publicKey, MoveTokenCommand(issuedToken))
-                this `fails with` "In move groups there must be an amount of input tokens > ZERO."
+                this `fails with` "You cannot input tokens with a zero amount."
             }
 
             // Outputs sum to zero.
@@ -210,7 +210,7 @@ class OwnedTokenAmountTests {
                 command(ALICE.publicKey, MoveTokenCommand(USD issuedBy BOB.party))
                 // Command for the move.
                 command(ALICE.publicKey, MoveTokenCommand(issuedToken))
-                this `fails with` "In move groups there must be an amount of output tokens > ZERO."
+                this `fails with` "You cannot output tokens with a zero amount."
             }
 
             // Unbalanced move.
@@ -231,7 +231,7 @@ class OwnedTokenAmountTests {
                 command(ALICE.publicKey, MoveTokenCommand(USD issuedBy BOB.party))
                 // Command for the move.
                 command(ALICE.publicKey, MoveTokenCommand(issuedToken))
-                this `fails with` "You cannot create output token amounts with a ZERO amount."
+                this `fails with` "You cannot output tokens with a zero amount."
             }
 
             // Two moves (two different groups).

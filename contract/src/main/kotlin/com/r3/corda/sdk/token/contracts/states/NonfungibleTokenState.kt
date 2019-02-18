@@ -1,5 +1,6 @@
 package com.r3.corda.sdk.token.contracts.states
 
+import com.r3.corda.sdk.token.contracts.ITokenState
 import com.r3.corda.sdk.token.contracts.NonfungibleTokenContract
 import com.r3.corda.sdk.token.contracts.commands.MoveTokenCommand
 import com.r3.corda.sdk.token.contracts.schemas.OwnedTokenSchemaV1
@@ -29,7 +30,7 @@ import net.corda.core.schemas.QueryableState
 open class NonfungibleTokenState<T : EmbeddableToken>(
         val token: IssuedToken<T>,
         override val owner: AbstractParty
-) : AbstractOwnedToken(), QueryableState {
+) : AbstractOwnedToken(), QueryableState, ITokenState {
     /** Helper for changing the owner of the state. */
     override fun withNewOwner(newOwner: AbstractParty): CommandAndState {
         return CommandAndState(MoveTokenCommand(token), NonfungibleTokenState(token, newOwner))

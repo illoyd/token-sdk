@@ -1,6 +1,7 @@
 package com.r3.corda.sdk.token.contracts.states
 
 import com.r3.corda.sdk.token.contracts.FungibleTokenContract
+import com.r3.corda.sdk.token.contracts.IFungibleTokenState
 import com.r3.corda.sdk.token.contracts.commands.MoveTokenCommand
 import com.r3.corda.sdk.token.contracts.schemas.OwnedTokenAmountSchemaV1
 import com.r3.corda.sdk.token.contracts.schemas.PersistentOwnedTokenAmount
@@ -10,7 +11,9 @@ import net.corda.core.contracts.Amount
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.CommandAndState
 import net.corda.core.contracts.FungibleState
+import net.corda.core.crypto.toStringShort
 import net.corda.core.identity.AbstractParty
+import net.corda.core.identity.Party
 import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
 import net.corda.core.schemas.QueryableState
@@ -28,12 +31,15 @@ import net.corda.core.schemas.QueryableState
  */
 @BelongsToContract(FungibleTokenContract::class)
 open class FungibleTokenState<T : EmbeddableToken>(
-        override val amount: Amount<IssuedToken<T>>,
+        override val token: IssuedToken<T>,
+        override val quantity: Long,
         override val owner: AbstractParty
-) : FungibleState<IssuedToken<T>>, AbstractOwnedToken(), QueryableState {
-    /** Helper for changing the owner of the state. */
-    override fun withNewOwner(newOwner: AbstractParty): CommandAndState {
-        return CommandAndState(MoveTokenCommand(amount.token), FungibleTokenState(amount, newOwner))
+) : IFungibleTokenState<T>, QueryableState {
+
+    constructor(amount: Amount<IssuedToken<T>>, owner: AbstractParty) : this(amount.token, amount.quantity, owner)
+
+    override fun withNewOwner(newOwner: AbstractParty): Pair<MoveTokenCommand<T>, IFungibleTokenState<T>> {
+        return Pair(MoveTokenCommand(token), FungibleTokenState(token, quantity, newOwner))
     }
 
     override fun toString(): String = "$amount owned by $ownerString"
@@ -66,5 +72,11 @@ open class FungibleTokenState<T : EmbeddableToken>(
         result = 31 * result + owner.hashCode()
         return result
     }
+
+    /** Converts [owner] into a more friendly string, e.g. shortens the public key for [AnonymousParty]s. */
+    // TODO: Is AbstractOwnedToken#ownerString needed?
+    private val ownerString
+        get() = (owner as? Party)?.name?.organisation
+                ?: owner.owningKey.toStringShort().substring(0, 16)
 }
 

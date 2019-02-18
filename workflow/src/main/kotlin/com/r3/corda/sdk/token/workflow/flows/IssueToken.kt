@@ -1,6 +1,7 @@
 package com.r3.corda.sdk.token.workflow.flows
 
 import co.paralleluniverse.fibers.Suspendable
+import com.r3.corda.sdk.token.contracts.ITokenState
 import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
 import com.r3.corda.sdk.token.contracts.states.AbstractOwnedToken
 import com.r3.corda.sdk.token.contracts.types.EmbeddableToken
@@ -89,7 +90,7 @@ object IssueToken {
             val issuedToken: IssuedToken<T> = token issuedBy me
 
             // Create the token. It's either an NonfungibleTokenState or FungibleTokenState.
-            val ownedToken: AbstractOwnedToken = if (amount == null) {
+            val ownedToken: ITokenState = if (amount == null) {
                 issuedToken ownedBy owningParty
             } else {
                 amount issuedBy me ownedBy owningParty
@@ -110,9 +111,9 @@ object IssueToken {
             }
 
             // Create the transaction.
-            val transactionState: TransactionState<AbstractOwnedToken> = ownedToken withNotary notary
+            val transactionState: TransactionState<ITokenState> = ownedToken withNotary notary
             val utx: TransactionBuilder = TransactionBuilder(notary = notary).apply {
-                addCommand(data = IssueTokenCommand(issuedToken), keys = me.owningKey)
+                addCommand(data = IssueTokenCommand(issuedToken), keys = listOf(me.owningKey))
                 addOutputState(state = transactionState)
             }
             // Sign the transaction. Only Concrete Parties should be used here.
