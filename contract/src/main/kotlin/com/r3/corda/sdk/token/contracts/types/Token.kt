@@ -13,4 +13,7 @@ import net.corda.core.contracts.TokenizableAssetInfo
  * This way,  * the token is responsible for storing itself in the schema rather than needing to decide within the
  * Contract. Also opens up the option of using any other thing as a token, and we can remove [EmbeddableToken].
  */
-interface Token : TokenizableAssetInfo
+interface Token : TokenizableAssetInfo {
+    val tokenIdentifier : String
+    val tokenClass : String
+}
