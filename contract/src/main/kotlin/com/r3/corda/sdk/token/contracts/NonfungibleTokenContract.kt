@@ -8,7 +8,7 @@ import net.corda.core.contracts.CommandWithParties
 import net.corda.core.transactions.LedgerTransaction
 
 /**
- * See java doc for [OwnedTokenAmountContract].
+ * See java doc for [FungibleTokenContract].
  */
 class NonfungibleTokenContract : AbstractOwnedTokenContract<NonfungibleTokenState<EmbeddableToken>>() {
 

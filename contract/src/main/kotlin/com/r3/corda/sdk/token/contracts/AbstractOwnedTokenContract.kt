@@ -13,13 +13,13 @@ import net.corda.core.contracts.select
 import net.corda.core.transactions.LedgerTransaction
 
 /**
- * This is an abstract contract which contains common functionality used by [OwnedTokenAmountContract] and
+ * This is an abstract contract which contains common functionality used by [FungibleTokenContract] and
  * [NonfungibleTokenContract]. It works by grouping tokens by type and then verifying each group individually. It must do this
  * because different tokens are not fungible. For example: 10 GBP issued by ALICE is not equal to 10 GBP issued by BOB.
  * Likewise, 10 USD is not equal to 10 GBP.
  *
  * This contract doesn't need to care about the specific details of tokens. It's really only concerned with ensuring
- * that tokens are issued, moved (input amount == output amount) and redeemed correctly. [OwnedTokenAmountContract] and
+ * that tokens are issued, moved (input amount == output amount) and redeemed correctly. [FungibleTokenContract] and
  * [NonfungibleTokenContract] specify their own implementations for issue, move and redeem.
  */
 abstract class AbstractOwnedTokenContract<T : AbstractOwnedToken> : Contract {

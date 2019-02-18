@@ -39,8 +39,8 @@ import net.corda.core.utilities.unwrap
  * @param amount the amount of the token to be issued. Note that this can be set to null. If it is set to null then an
  * [OwnedToken] state is issued. This state wraps a [IssuedToken] [EmbeddableToken] with an [owner]. The [EmbeddableToken] is
  * non-fungible inside [OwnedToken]s - they cannot be split or merged because there is only ever one of them. However,
- * if an amount is specified, then that many tokens will be issued using an [OwnedTokenAmount] state. Currently, there
- * will be a single [OwnedTokenAmount] state issued for the amount of [IssuedToken] [EmbeddableToken] specified. Note that
+ * if an amount is specified, then that many tokens will be issued using an [FungibleTokenState] state. Currently, there
+ * will be a single [FungibleTokenState] state issued for the amount of [IssuedToken] [EmbeddableToken] specified. Note that
  * if an amount of ONE is specified and the token has fraction digits set to "0.1" then that ONE token could be split
  * into TEN atomic units of the token. Likewise, if the token has fraction digits set to "0.01", then that ONE token
  * could be split into ONE HUNDRED atomic units of the token.
@@ -50,7 +50,7 @@ import net.corda.core.utilities.unwrap
  * It is likely that this flow will be split up in the future as the process becomes more complex.
  *
  * TODO: Add more constructors.
- * TODO: Allow for more customisation, e.g. tokens issued across multiple states instead of a single OwnedTokenAmount.
+ * TODO: Allow for more customisation, e.g. tokens issued across multiple states instead of a single FungibleTokenState.
  * TODO: Split into two flows. One for owned tokens and another for owned token amounts.
  * TODO: Profile and optimise this flow.
  */
@@ -88,7 +88,7 @@ object IssueToken {
             // Create the issued token. We add this to the commands for grouping.
             val issuedToken: IssuedToken<T> = token issuedBy me
 
-            // Create the token. It's either an NonfungibleTokenState or OwnedTokenAmount.
+            // Create the token. It's either an NonfungibleTokenState or FungibleTokenState.
             val ownedToken: AbstractOwnedToken = if (amount == null) {
                 issuedToken ownedBy owningParty
             } else {

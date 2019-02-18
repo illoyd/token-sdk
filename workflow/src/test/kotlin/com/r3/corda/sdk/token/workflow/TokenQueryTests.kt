@@ -1,7 +1,7 @@
 package com.r3.corda.sdk.token.workflow
 
 import com.r3.corda.sdk.token.contracts.states.NonfungibleTokenState
-import com.r3.corda.sdk.token.contracts.states.OwnedTokenAmount
+import com.r3.corda.sdk.token.contracts.states.FungibleTokenState
 import com.r3.corda.sdk.token.contracts.types.FixedToken
 import com.r3.corda.sdk.token.contracts.utilities.sumOrThrow
 import com.r3.corda.sdk.token.money.BTC
@@ -65,10 +65,10 @@ class TokenQueryTests : MockNetworkTest(numberOfNodes = 3) {
     fun `query for all owned token amounts`() {
         // Query for all tokens and check they are all returned.
         val query = QueryCriteria.FungibleStateQueryCriteria(
-                contractStateTypes = setOf(OwnedTokenAmount::class.java),
+                contractStateTypes = setOf(FungibleTokenState::class.java),
                 relevancyStatus = Vault.RelevancyStatus.RELEVANT
         )
-        val states = A.services.vaultService.queryBy<OwnedTokenAmount<*>>(query).states
+        val states = A.services.vaultService.queryBy<FungibleTokenState<*>>(query).states
         assertEquals(allTokens.size, states.size)
     }
 

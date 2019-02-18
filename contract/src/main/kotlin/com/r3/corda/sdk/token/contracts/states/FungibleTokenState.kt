@@ -1,6 +1,6 @@
 package com.r3.corda.sdk.token.contracts.states
 
-import com.r3.corda.sdk.token.contracts.OwnedTokenAmountContract
+import com.r3.corda.sdk.token.contracts.FungibleTokenContract
 import com.r3.corda.sdk.token.contracts.commands.MoveTokenCommand
 import com.r3.corda.sdk.token.contracts.schemas.OwnedTokenAmountSchemaV1
 import com.r3.corda.sdk.token.contracts.schemas.PersistentOwnedTokenAmount
@@ -26,14 +26,14 @@ import net.corda.core.schemas.QueryableState
  *
  * The class is open, so it can be extended to add new functionality, like a whitelisted token, for example.
  */
-@BelongsToContract(OwnedTokenAmountContract::class)
-open class OwnedTokenAmount<T : EmbeddableToken>(
+@BelongsToContract(FungibleTokenContract::class)
+open class FungibleTokenState<T : EmbeddableToken>(
         override val amount: Amount<IssuedToken<T>>,
         override val owner: AbstractParty
 ) : FungibleState<IssuedToken<T>>, AbstractOwnedToken(), QueryableState {
     /** Helper for changing the owner of the state. */
     override fun withNewOwner(newOwner: AbstractParty): CommandAndState {
-        return CommandAndState(MoveTokenCommand(amount.token), OwnedTokenAmount(amount, newOwner))
+        return CommandAndState(MoveTokenCommand(amount.token), FungibleTokenState(amount, newOwner))
     }
 
     override fun toString(): String = "$amount owned by $ownerString"
@@ -53,7 +53,7 @@ open class OwnedTokenAmount<T : EmbeddableToken>(
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
-        if (other !is OwnedTokenAmount<*>) return false
+        if (other !is FungibleTokenState<*>) return false
 
         if (amount != other.amount) return false
         if (owner != other.owner) return false

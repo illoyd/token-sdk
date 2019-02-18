@@ -2,7 +2,7 @@ package com.r3.corda.sdk.token.workflow.selection
 
 import co.paralleluniverse.fibers.Suspendable
 import com.r3.corda.sdk.token.contracts.commands.MoveTokenCommand
-import com.r3.corda.sdk.token.contracts.states.OwnedTokenAmount
+import com.r3.corda.sdk.token.contracts.states.FungibleTokenState
 import com.r3.corda.sdk.token.contracts.types.EmbeddableToken
 import com.r3.corda.sdk.token.contracts.types.IssuedToken
 import com.r3.corda.sdk.token.contracts.utilities.sumOrThrow
@@ -53,7 +53,7 @@ class TokenSelection(val services: ServiceHub, private val maxRetries: Int = 8, 
             lockId: UUID,
             additionalCriteria: QueryCriteria,
             sorter: Sort,
-            stateAndRefs: MutableList<StateAndRef<OwnedTokenAmount<T>>>
+            stateAndRefs: MutableList<StateAndRef<FungibleTokenState<T>>>
     ): Boolean {
         // Didn't need to select any tokens.
         if (requiredAmount.quantity == 0L) {
@@ -63,14 +63,14 @@ class TokenSelection(val services: ServiceHub, private val maxRetries: Int = 8, 
         // Enrich QueryCriteria with additional default attributes (such as soft locks).
         // We only want to return RELEVANT states here.
         val baseCriteria = QueryCriteria.VaultQueryCriteria(
-                contractStateTypes = setOf(OwnedTokenAmount::class.java),
+                contractStateTypes = setOf(FungibleTokenState::class.java),
                 softLockingCondition = QueryCriteria.SoftLockingCondition(QueryCriteria.SoftLockingType.UNLOCKED_AND_SPECIFIED, listOf(lockId)),
                 relevancyStatus = Vault.RelevancyStatus.RELEVANT,
                 status = Vault.StateStatus.UNCONSUMED
         )
 
         // TODO: Add paging in case there are not enough states in one page to fill the required requiredAmount. E.g. Dust.
-        val results: Vault.Page<OwnedTokenAmount<T>> = services.vaultService.queryBy(baseCriteria.and(additionalCriteria), sorter)
+        val results: Vault.Page<FungibleTokenState<T>> = services.vaultService.queryBy(baseCriteria.and(additionalCriteria), sorter)
 
         var claimedAmount = 0L
         for (state in results.states) {
@@ -102,8 +102,8 @@ class TokenSelection(val services: ServiceHub, private val maxRetries: Int = 8, 
             lockId: UUID,
             additionalCriteria: QueryCriteria = ownedTokenAmountCriteria(requiredAmount.token),
             sorter: Sort = sortByStateRefAscending()
-    ): List<StateAndRef<OwnedTokenAmount<T>>> {
-        val stateAndRefs = mutableListOf<StateAndRef<OwnedTokenAmount<T>>>()
+    ): List<StateAndRef<FungibleTokenState<T>>> {
+        val stateAndRefs = mutableListOf<StateAndRef<FungibleTokenState<T>>>()
         for (retryCount in 1..maxRetries) {
             // TODO: Need to specify exactly why it fails. Locked states or literally _no_ states!
             // No point in retrying if there will never be enough...
@@ -163,13 +163,13 @@ class TokenSelection(val services: ServiceHub, private val maxRetries: Int = 8, 
         // multiple output states, due to the need to keep states separated by issuer. We start by figuring out
         // how much we've gathered for each issuer: this map will keep track of how much we've used from each
         // as we work our way through the payments.
-        val tokensGroupedByIssuer: Map<IssuedToken<T>, List<StateAndRef<OwnedTokenAmount<T>>>> = acceptableStates.groupBy { it.state.data.amount.token }
+        val tokensGroupedByIssuer: Map<IssuedToken<T>, List<StateAndRef<FungibleTokenState<T>>>> = acceptableStates.groupBy { it.state.data.amount.token }
         val remainingTokensFromEachIssuer = tokensGroupedByIssuer.mapValues { (_, value) ->
             value.map { (state) -> state.data.amount }.sumOrThrow()
         }.toList().toMutableList()
 
         // Calculate the list of output states making sure that the
-        val outputStates = mutableListOf<TransactionState<OwnedTokenAmount<T>>>()
+        val outputStates = mutableListOf<TransactionState<FungibleTokenState<T>>>()
         for ((party, paymentAmount) in partyAndAmounts) {
             var remainingToPay = paymentAmount.quantity
             while (remainingToPay > 0) {
@@ -178,20 +178,20 @@ class TokenSelection(val services: ServiceHub, private val maxRetries: Int = 8, 
                 when {
                     delta > 0 -> {
                         // The states from the current issuer more than covers this payment.
-                        outputStates += OwnedTokenAmount(Amount(remainingToPay, token), party) withNotary notary
+                        outputStates += FungibleTokenState(Amount(remainingToPay, token), party) withNotary notary
                         remainingTokensFromEachIssuer[remainingTokensFromEachIssuer.lastIndex] = Pair(token, Amount(delta, token))
                         remainingToPay = 0
                     }
                     delta == 0L -> {
                         // The states from the current issuer exactly covers this payment.
-                        outputStates += OwnedTokenAmount(Amount(remainingToPay, token), party) withNotary notary
+                        outputStates += FungibleTokenState(Amount(remainingToPay, token), party) withNotary notary
                         remainingTokensFromEachIssuer.removeAt(remainingTokensFromEachIssuer.lastIndex)
                         remainingToPay = 0
                     }
                     delta < 0 -> {
                         // The states from the current issuer don't cover this payment, so we'll have to use >1 output
                         // state to cover this payment.
-                        outputStates += OwnedTokenAmount(remainingFromCurrentIssuer, party) withNotary notary
+                        outputStates += FungibleTokenState(remainingFromCurrentIssuer, party) withNotary notary
                         remainingTokensFromEachIssuer.removeAt(remainingTokensFromEachIssuer.lastIndex)
                         remainingToPay -= remainingFromCurrentIssuer.quantity
                     }
@@ -201,7 +201,7 @@ class TokenSelection(val services: ServiceHub, private val maxRetries: Int = 8, 
 
         // Generate the change states.
         remainingTokensFromEachIssuer.forEach { (_, amount) ->
-            outputStates += OwnedTokenAmount(amount, changeIdentity.party.anonymise()) withNotary notary
+            outputStates += FungibleTokenState(amount, changeIdentity.party.anonymise()) withNotary notary
         }
 
         // Create a move command for each group.

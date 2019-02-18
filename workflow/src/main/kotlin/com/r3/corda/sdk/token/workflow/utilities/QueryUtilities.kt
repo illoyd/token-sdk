@@ -3,7 +3,7 @@ package com.r3.corda.sdk.token.workflow.utilities
 import com.r3.corda.sdk.token.contracts.schemas.PersistentOwnedToken
 import com.r3.corda.sdk.token.contracts.schemas.PersistentOwnedTokenAmount
 import com.r3.corda.sdk.token.contracts.states.NonfungibleTokenState
-import com.r3.corda.sdk.token.contracts.states.OwnedTokenAmount
+import com.r3.corda.sdk.token.contracts.states.FungibleTokenState
 import com.r3.corda.sdk.token.contracts.types.EmbeddableToken
 import com.r3.corda.sdk.token.workflow.schemas.DistributionRecord
 import net.corda.core.contracts.Amount
@@ -92,7 +92,7 @@ private fun <T : EmbeddableToken> sumTokenCriteria(embeddableToken: T): QueryCri
 }
 
 // Abstracts away the nasty 'otherResults' part of the vault query API.
-private fun <T : EmbeddableToken> rowsToAmount(embeddableToken: T, rows: Vault.Page<OwnedTokenAmount<T>>): Amount<T> {
+private fun <T : EmbeddableToken> rowsToAmount(embeddableToken: T, rows: Vault.Page<FungibleTokenState<T>>): Amount<T> {
     return if (rows.otherResults.isEmpty()) {
         Amount(0L, embeddableToken)
     } else {
@@ -106,7 +106,7 @@ private fun <T : EmbeddableToken> rowsToAmount(embeddableToken: T, rows: Vault.P
 /** General queries. */
 
 // Get all owned token amounts for a specific token, ignoring the issuer.
-fun <T : EmbeddableToken> VaultService.ownedTokenAmountsByToken(embeddableToken: T): Vault.Page<OwnedTokenAmount<T>> {
+fun <T : EmbeddableToken> VaultService.ownedTokenAmountsByToken(embeddableToken: T): Vault.Page<FungibleTokenState<T>> {
     return queryBy(ownedTokenAmountCriteria(embeddableToken))
 }
 
@@ -120,6 +120,6 @@ fun <T : EmbeddableToken> VaultService.ownedTokensByToken(embeddableToken: T): V
 // We need to group the sum by the token class and token identifier.
 fun <T : EmbeddableToken> VaultService.tokenBalance(embeddableToken: T): Amount<T> {
     val query = ownedTokenAmountCriteria(embeddableToken).and(sumTokenCriteria(embeddableToken))
-    val result = queryBy<OwnedTokenAmount<T>>(query)
+    val result = queryBy<FungibleTokenState<T>>(query)
     return rowsToAmount(embeddableToken, result)
 }

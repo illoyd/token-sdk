@@ -1,7 +1,7 @@
 package com.r3.corda.sdk.token.contracts.utilities
 
 import com.r3.corda.sdk.token.contracts.states.NonfungibleTokenState
-import com.r3.corda.sdk.token.contracts.states.OwnedTokenAmount
+import com.r3.corda.sdk.token.contracts.states.FungibleTokenState
 import com.r3.corda.sdk.token.contracts.types.EmbeddableToken
 import com.r3.corda.sdk.token.contracts.types.IssuedToken
 import net.corda.core.contracts.Amount
@@ -54,10 +54,10 @@ infix fun <T : EmbeddableToken> Amount<T>._issuedBy(issuer: Party): Amount<Issue
 // For wrapping Tokens with an issuer: Token -> IssuedToken<Token>
 infix fun <T : EmbeddableToken> T.issuedBy(issuer: Party) = _issuedBy(issuer)
 
-// For adding ownership information to a Token. Wraps an amount of some IssuedToken Token with an OwnedTokenAmount state.
+// For adding ownership information to a Token. Wraps an amount of some IssuedToken Token with an FungibleTokenState state.
 infix fun <T : EmbeddableToken> Amount<IssuedToken<T>>.ownedBy(owner: AbstractParty) = _ownedBy(owner)
 
-infix fun <T : EmbeddableToken> Amount<IssuedToken<T>>._ownedBy(owner: AbstractParty) = OwnedTokenAmount(this, owner)
+infix fun <T : EmbeddableToken> Amount<IssuedToken<T>>._ownedBy(owner: AbstractParty) = FungibleTokenState(this, owner)
 
 // As above but wraps the token with an NonfungibleTokenState state.
 infix fun <T : EmbeddableToken> IssuedToken<T>.ownedBy(owner: AbstractParty) = _ownedBy(owner)

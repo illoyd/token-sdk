@@ -2,7 +2,7 @@ package com.r3.corda.sdk.token.contracts
 
 import com.r3.corda.sdk.token.contracts.commands.TokenCommand
 import com.r3.corda.sdk.token.contracts.states.AbstractOwnedToken
-import com.r3.corda.sdk.token.contracts.states.OwnedTokenAmount
+import com.r3.corda.sdk.token.contracts.states.FungibleTokenState
 import com.r3.corda.sdk.token.contracts.types.EmbeddableToken
 import com.r3.corda.sdk.token.contracts.types.IssuedToken
 import com.r3.corda.sdk.token.contracts.utilities.sumTokens
@@ -13,30 +13,30 @@ import net.corda.core.transactions.LedgerTransaction.InOutGroup
 import java.security.PublicKey
 
 /**
- * This is the [OwnedTokenAmount] contract. It is likely to be present in MANY transactions. The [OwnedTokenAmount]
+ * This is the [FungibleTokenState] contract. It is likely to be present in MANY transactions. The [FungibleTokenState]
  * state is a "lowest common denominator" state in that its contract does not reference any other state types, only the
- * [OwnedTokenAmount]. However, the [OwnedTokenAmount] state can and will be referenced by many other contracts, for
+ * [FungibleTokenState]. However, the [FungibleTokenState] state can and will be referenced by many other contracts, for
  * example, the obligation contract.
  *
- * The [OwnedTokenAmount] contract sub-classes the [AbstractOwnedToken] contract which contains the "verify" method.
+ * The [FungibleTokenState] contract sub-classes the [AbstractOwnedToken] contract which contains the "verify" method.
  * To add functionality to this contract, developers should:
  * 1. Create their own commands which implement the [TokenCommand] interface.
  * 2. override the [AbstractOwnedTokenContract.dispatchOnCommand] method to add support for the new command, remembering
  *    to call the super method to handle the existing commands.
  * 3. Add a method to handle the new command in the new sub-class contract.
  */
-open class OwnedTokenAmountContract : AbstractOwnedTokenContract<OwnedTokenAmount<EmbeddableToken>>() {
+open class FungibleTokenContract : AbstractOwnedTokenContract<FungibleTokenState<EmbeddableToken>>() {
 
     companion object {
         val contractId = this::class.java.enclosingClass.canonicalName
     }
 
-    override fun groupStates(tx: LedgerTransaction): List<InOutGroup<OwnedTokenAmount<EmbeddableToken>, IssuedToken<EmbeddableToken>>> {
+    override fun groupStates(tx: LedgerTransaction): List<InOutGroup<FungibleTokenState<EmbeddableToken>, IssuedToken<EmbeddableToken>>> {
         return tx.groupStates { state -> state.amount.token }
     }
 
     override fun handleIssue(
-            group: InOutGroup<OwnedTokenAmount<EmbeddableToken>, IssuedToken<EmbeddableToken>>,
+            group: InOutGroup<FungibleTokenState<EmbeddableToken>, IssuedToken<EmbeddableToken>>,
             issueCommand: CommandWithParties<TokenCommand<*>>
     ) {
         val token = group.groupingKey
@@ -59,7 +59,7 @@ open class OwnedTokenAmountContract : AbstractOwnedTokenContract<OwnedTokenAmoun
     }
 
     override fun handleMove(
-            group: InOutGroup<OwnedTokenAmount<EmbeddableToken>, IssuedToken<EmbeddableToken>>,
+            group: InOutGroup<FungibleTokenState<EmbeddableToken>, IssuedToken<EmbeddableToken>>,
             moveCommands: List<CommandWithParties<TokenCommand<*>>>
     ) {
         val token = group.groupingKey
@@ -90,7 +90,7 @@ open class OwnedTokenAmountContract : AbstractOwnedTokenContract<OwnedTokenAmoun
     }
 
     override fun handleRedeem(
-            group: InOutGroup<OwnedTokenAmount<EmbeddableToken>, IssuedToken<EmbeddableToken>>,
+            group: InOutGroup<FungibleTokenState<EmbeddableToken>, IssuedToken<EmbeddableToken>>,
             redeemCommand: CommandWithParties<TokenCommand<*>>
     ) {
         val token = group.groupingKey
