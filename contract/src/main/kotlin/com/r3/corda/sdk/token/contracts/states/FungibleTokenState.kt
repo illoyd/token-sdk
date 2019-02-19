@@ -31,12 +31,15 @@ import net.corda.core.schemas.QueryableState
  */
 @BelongsToContract(FungibleTokenContract::class)
 open class FungibleTokenState<T : EmbeddableToken>(
-        override val token: IssuedToken<T>,
-        override val quantity: Long,
+        override val amount: Amount<IssuedToken<T>>,
         override val owner: AbstractParty
 ) : IFungibleTokenState<T>, QueryableState {
 
-    constructor(amount: Amount<IssuedToken<T>>, owner: AbstractParty) : this(amount.token, amount.quantity, owner)
+    constructor(token: IssuedToken<T>, quantity: Long, owner: AbstractParty) : this(Amount( quantity,  token), owner)
+
+    override val quantity : Long get() = amount.quantity
+
+    override val token: IssuedToken<T> get() = amount.token
 
     override fun withNewOwner(newOwner: AbstractParty): Pair<MoveTokenCommand<T>, IFungibleTokenState<T>> {
         return Pair(MoveTokenCommand(token), FungibleTokenState(token, quantity, newOwner))

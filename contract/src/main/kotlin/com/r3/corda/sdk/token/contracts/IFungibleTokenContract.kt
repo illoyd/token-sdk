@@ -13,7 +13,8 @@ import net.corda.core.transactions.LedgerTransaction
 
 interface IFungibleTokenContract<T : EmbeddableToken> : Contract {
     // Standard behaviour for Issue
-    fun verify(
+    @VerifyTokenCommandMethod(IssueTokenCommand::class)
+    fun verifyIssue(
             command: IssueTokenCommand<T>,
             inputs: List<IFungibleTokenState<T>>,
             outputs: List<IFungibleTokenState<T>>,
@@ -21,7 +22,8 @@ interface IFungibleTokenContract<T : EmbeddableToken> : Contract {
     )
 
     // Standard behaviour for Move
-    fun verify(
+    @VerifyTokenCommandMethod(MoveTokenCommand::class)
+    fun verifyMove(
             command: MoveTokenCommand<T>,
             inputs: List<IFungibleTokenState<T>>,
             outputs: List<IFungibleTokenState<T>>,
@@ -29,7 +31,8 @@ interface IFungibleTokenContract<T : EmbeddableToken> : Contract {
     )
 
     // Standard behaviour for Redeem
-    fun verify(
+    @VerifyTokenCommandMethod(RedeemTokenCommand::class)
+    fun verifyRedeem(
             command: RedeemTokenCommand<T>,
             inputs: List<IFungibleTokenState<T>>,
             outputs: List<IFungibleTokenState<T>>,

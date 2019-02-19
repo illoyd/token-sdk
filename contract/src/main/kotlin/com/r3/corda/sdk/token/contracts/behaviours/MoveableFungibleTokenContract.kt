@@ -2,10 +2,12 @@ package com.r3.corda.sdk.token.contracts.behaviours
 
 import com.r3.corda.sdk.token.contracts.IFungibleTokenContract
 import com.r3.corda.sdk.token.contracts.IFungibleTokenState
+import com.r3.corda.sdk.token.contracts.VerifyTokenCommandMethod
 import com.r3.corda.sdk.token.contracts.commands.IssueTokenCommand
 import com.r3.corda.sdk.token.contracts.commands.MoveTokenCommand
 import com.r3.corda.sdk.token.contracts.types.EmbeddableToken
 import com.r3.corda.sdk.token.contracts.types.IssuedToken
+import net.corda.core.contracts.TransactionVerificationException
 import net.corda.core.contracts.requireSingleCommand
 import net.corda.core.contracts.select
 import net.corda.core.internal.sumByLong
@@ -14,7 +16,8 @@ import net.corda.core.transactions.LedgerTransaction
 interface MoveableFungibleTokenContract<T: EmbeddableToken> : IFungibleTokenContract<T> {
 
     // Standard behaviour for Issue
-    override fun verify(
+    @VerifyTokenCommandMethod(MoveTokenCommand::class)
+    override fun verifyMove(
             command: MoveTokenCommand<T>,
             inputs: List<IFungibleTokenState<T>>,
             outputs: List<IFungibleTokenState<T>>,
