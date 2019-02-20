@@ -13,6 +13,7 @@ import net.corda.core.utilities.getOrThrow
 import net.corda.testing.node.StartedMockNode
 import org.junit.Before
 import org.junit.Test
+import java.time.Duration
 import kotlin.test.assertEquals
 
 class TokenFlowTests : MockNetworkTest(numberOfNodes = 3) {
@@ -52,11 +53,14 @@ class TokenFlowTests : MockNetworkTest(numberOfNodes = 3) {
 
     @Test
     fun `issue and move fixed tokens`() {
+        println("Issuing")
         val issueTokenTx = I.issueTokens(GBP, A, NOTARY, 100.GBP).getOrThrow()
-        A.watchForTransaction(issueTokenTx.id).getOrThrow()
-        // Check to see that A was added to I's distribution list.
+        println("Issuing: $issueTokenTx")
+        A.watchForTransaction(issueTokenTx.id).getOrThrow(Duration.ofSeconds(5))
+        println("Moving")
         val moveTokenTx = A.moveTokens(GBP, B, 50.GBP, anonymous = true).getOrThrow()
-        B.watchForTransaction(moveTokenTx.id).getOrThrow()
+        println("Moving: $moveTokenTx")
+        B.watchForTransaction(moveTokenTx.id).getOrThrow(Duration.ofSeconds(5))
         println(moveTokenTx.tx)
     }
 

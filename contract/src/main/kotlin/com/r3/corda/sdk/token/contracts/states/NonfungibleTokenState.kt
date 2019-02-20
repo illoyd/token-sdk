@@ -9,7 +9,9 @@ import com.r3.corda.sdk.token.contracts.types.EmbeddableToken
 import com.r3.corda.sdk.token.contracts.types.IssuedToken
 import net.corda.core.contracts.BelongsToContract
 import net.corda.core.contracts.CommandAndState
+import net.corda.core.crypto.toStringShort
 import net.corda.core.identity.AbstractParty
+import net.corda.core.identity.Party
 import net.corda.core.schemas.MappedSchema
 import net.corda.core.schemas.PersistentState
 import net.corda.core.schemas.QueryableState
@@ -28,9 +30,9 @@ import net.corda.core.schemas.QueryableState
  */
 @BelongsToContract(NonfungibleTokenContract::class)
 open class NonfungibleTokenState<T : EmbeddableToken>(
-        val token: IssuedToken<T>,
+        override val token: IssuedToken<T>,
         override val owner: AbstractParty
-) : AbstractOwnedToken(), QueryableState, ITokenState {
+) : AbstractOwnedToken(), QueryableState, ITokenState<T> {
     /** Helper for changing the owner of the state. */
     override fun withNewOwner(newOwner: AbstractParty): CommandAndState {
         return CommandAndState(MoveTokenCommand(token), NonfungibleTokenState(token, newOwner))
@@ -65,4 +67,10 @@ open class NonfungibleTokenState<T : EmbeddableToken>(
         result = 31 * result + owner.hashCode()
         return result
     }
+
+    /** Converts [owner] into a more friendly string, e.g. shortens the public key for [AnonymousParty]s. */
+    // TODO: Is AbstractOwnedToken#ownerString needed?
+    override val ownerString
+        get() = (owner as? Party)?.name?.organisation
+                ?: owner.owningKey.toStringShort().substring(0, 16)
 }

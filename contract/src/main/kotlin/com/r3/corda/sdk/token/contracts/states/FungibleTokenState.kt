@@ -37,10 +37,6 @@ open class FungibleTokenState<T : EmbeddableToken>(
 
     constructor(token: IssuedToken<T>, quantity: Long, owner: AbstractParty) : this(Amount( quantity,  token), owner)
 
-    override val quantity : Long get() = amount.quantity
-
-    override val token: IssuedToken<T> get() = amount.token
-
     override fun withNewOwner(newOwner: AbstractParty): Pair<MoveTokenCommand<T>, IFungibleTokenState<T>> {
         return Pair(MoveTokenCommand(token), FungibleTokenState(token, quantity, newOwner))
     }
@@ -78,7 +74,7 @@ open class FungibleTokenState<T : EmbeddableToken>(
 
     /** Converts [owner] into a more friendly string, e.g. shortens the public key for [AnonymousParty]s. */
     // TODO: Is AbstractOwnedToken#ownerString needed?
-    private val ownerString
+    override val ownerString
         get() = (owner as? Party)?.name?.organisation
                 ?: owner.owningKey.toStringShort().substring(0, 16)
 }

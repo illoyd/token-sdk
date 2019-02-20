@@ -18,6 +18,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.KFunction
 import kotlin.reflect.full.functions
 import kotlin.reflect.full.memberFunctions
+
 /**
  * This is the [FungibleTokenState] contract. It is likely to be present in MANY transactions. The [FungibleTokenState]
  * state is a "lowest common denominator" state in that its contract does not reference any other state types, only the
@@ -32,10 +33,10 @@ import kotlin.reflect.full.memberFunctions
  * 3. Add a method to handle the new command in the new sub-class contract.
  */
 open class FungibleTokenContract<T : EmbeddableToken> :
+        IFungibleTokenContract<T>,
         MoveableFungibleTokenContract<T>,
         IssuableFungibleTokenContract<T>,
-        RedeemableFungibleTokenContract<T>,
-        IFungibleTokenContract<T> {
+        RedeemableFungibleTokenContract<T> {
 
     companion object {
         val ID = this::class.java.enclosingClass.canonicalName
@@ -61,7 +62,6 @@ open class FungibleTokenContract<T : EmbeddableToken> :
         val verifyMap = mutableMapOf<KClass<out TokenCommand<*>>, MutableList<KFunction<*>>>()
         this::class.functions.forEach { func ->
             func.annotations.forEach { annotation ->
-                println(func)
                 if (annotation is VerifyTokenCommandMethod) {
                     if (verifyMap.containsKey(annotation.value).not()) {
                         verifyMap[annotation.value] = mutableListOf<KFunction<*>>()
@@ -96,10 +96,9 @@ open class FungibleTokenContract<T : EmbeddableToken> :
 
                 if (verifyMap[it.value::class]?.isNotEmpty() == true) {
                     verifyMap[it.value::class]?.forEach { verifyFunction ->
-                        println(verifyFunction)
                         try {
                             verifyFunction.call(this, it.value, group.inputs, group.outputs, tx)
-                        } catch(e : InvocationTargetException) {
+                        } catch (e: InvocationTargetException) {
                             throw e.targetException
                         }
                     }

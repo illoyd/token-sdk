@@ -74,23 +74,28 @@ object IssueToken {
         override fun call(): SignedTransaction {
             // This is the identity which will be used to issue tokens.
             // We also need a session for the other side.
+            println("Parties")
             val me: Party = ourIdentity
             val ownerSession = initiateFlow(owner)
 
             // Notify the recipient that we'll be issuing them a tokens and advise them of anything they must do, e.g.
             // generate a confidential identity for the issuer or sign up for updates for evolvable tokens.
+            println("Notify")
             ownerSession.send(TokenIssuanceNotification(anonymous = anonymous))
 
             // This is the recipient of the tokens identity.
+            println("Anonymise")
             val owningParty: AbstractParty = if (anonymous) {
                 subFlow(RequestConfidentialIdentity.Initiator(ownerSession)).party.anonymise()
             } else owner
 
             // Create the issued token. We add this to the commands for grouping.
+            println("Make Issue Token")
             val issuedToken: IssuedToken<T> = token issuedBy me
 
             // Create the token. It's either an NonfungibleTokenState or FungibleTokenState.
-            val ownedToken: ITokenState = if (amount == null) {
+            println("Make Own token")
+            val ownedToken: ITokenState<T> = if (amount == null) {
                 issuedToken ownedBy owningParty
             } else {
                 amount issuedBy me ownedBy owningParty
@@ -106,19 +111,23 @@ object IssueToken {
             // where data distribution groups come in very handy! The token issuers would sign up to updates from the
             // token maintainer, and in turn, the recipients of those tokens from the issuer would sign up to updates
             // from the issuer, this way the token updates proliferate through the network.
+            println("Pointer")
             if (token is TokenPointer<*>) {
                 subFlow(AddPartyToDistributionList(owner, token.pointer.pointer))
             }
 
             // Create the transaction.
-            val transactionState: TransactionState<ITokenState> = ownedToken withNotary notary
+            println("Build")
+            val transactionState: TransactionState<ITokenState<T>> = ownedToken withNotary notary
             val utx: TransactionBuilder = TransactionBuilder(notary = notary).apply {
                 addCommand(data = IssueTokenCommand(issuedToken), keys = listOf(me.owningKey))
                 addOutputState(state = transactionState)
             }
             // Sign the transaction. Only Concrete Parties should be used here.
+            println("Sign")
             val stx: SignedTransaction = serviceHub.signInitialTransaction(utx)
             // No need to pass in a session as there's no counterparty involved.
+            println("Finalise ${stx.id}")
             return subFlow(FinalityFlow(transaction = stx, sessions = listOf(ownerSession)))
         }
     }
@@ -129,14 +138,17 @@ object IssueToken {
         override fun call(): SignedTransaction {
             // Receive an issuance notification from the issuer. It tells us if we need to sign up for token updates or
             // generate a confidential identity.
+            println("Receive notify")
             val issuanceNotification = otherSession.receive<TokenIssuanceNotification>().unwrap { it }
 
             // Generate and send over a new confidential identity, if necessary.
             if (issuanceNotification.anonymous) {
+                println("Respond to anon")
                 subFlow(RequestConfidentialIdentity.Responder(otherSession))
             }
 
             // Resolve the issuance transaction.
+            println("Receive finalise")
             return subFlow(ReceiveFinalityFlow(otherSideSession = otherSession, statesToRecord = StatesToRecord.ALL_VISIBLE))
         }
     }

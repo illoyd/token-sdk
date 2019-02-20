@@ -13,7 +13,7 @@ abstract class AbstractOwnedToken : OwnableState {
 
     /** Converts [owner] into a more friendly string, e.g. shortens the public key for [AnonymousParty]s. */
     // TODO: Is AbstractOwnedToken#ownerString needed?
-    protected val ownerString
+    protected open val ownerString
         get() = (owner as? Party)?.name?.organisation
                 ?: owner.owningKey.toStringShort().substring(0, 16)
 }
